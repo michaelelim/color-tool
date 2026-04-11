@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Tool</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            transition: background 0.3s ease;
+        }
+
+        body.light-theme {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        body.dark-theme {
+            background: linear-gradient(135deg, #1a2a6c 0%, #b21f1f 100%);
+        }
+
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            padding: 30px;
+            width: 100%;
+            max-width: 500px;
+            transition: background 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        body.dark-theme .container {
+            background: #2d2d2d;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 28px;
+            transition: color 0.3s ease;
+        }
+
+        body.dark-theme h1 {
+            color: #f0f0f0;
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 8px 12px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        body.dark-theme .theme-toggle {
+            background: rgba(0,0,0,0.3);
+        }
+
+        .theme-toggle span {
+            font-size: 14px;
+            transition: color 0.3s ease;
+        }
+
+        body.dark-theme .theme-toggle span {
+            color: #f0f0f0;
+        }
+
+        .theme-toggle .toggle-icon {
+            font-size: 18px;
+        }
+
+        .color-picker-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        input[type="color"] {
+            width: 60px;
+            height: 60px;
+            border: none;
+            border-radius: 8px;
+            padding: 0;
+            cursor: pointer;
+        }
+
+        .color-value {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 18px;
+            font-family: monospace;
+            text-align: center;
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+        }
+
+        body.dark-theme .color-value {
+            border-color: #444;
+            background: #3d3d3d;
+            color: #f0f0f0;
+        }
+
+        .color-value:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        body.dark-theme .color-value:focus {
+            border-color: #8a9aff;
+        }
+
+        .color-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .color-box {
+            height: 80px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-family: monospace;
+            font-size: 14px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            transition: background 0.3s ease;
+        }
+
+        .color-format {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 16px;
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+        }
+
+        body.dark-theme .color-format {
+            border-color: #444;
+            background: #3d3d3d;
+            color: #f0f0f0;
+        }
+
+        .palette {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .palette-color {
+            height: 60px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .palette-color:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .instructions {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            color: #666;
+            font-size: 14px;
+            text-align: center;
+            transition: color 0.3s ease, border-color 0.3s ease;
+        }
+
+        body.dark-theme .instructions {
+            color: #ccc;
+            border-top-color: #444;
+        }
+
+        .color-name {
+            text-align: center;
+            margin-top: 10px;
+            font-style: italic;
+            color: #888;
+            transition: color 0.3s ease;
+        }
+
+        body.dark-theme .color-name {
+            color: #bbb;
+        }
+    </style>
+</head>
+<body>
+    <div class="theme-toggle" id="themeToggle">
+        <span>Dark Mode</span>
+        <span class="toggle-icon">🌙</span>
+    </div>
+    <div class="container">
+        <h1>Color Tool</h1>
+        
+        <div class="color-picker-container">
+            <input type="color" id="colorPicker" value="#667eea">
+            <input type="text" id="colorValue" class="color-value" value="#667eea" maxlength="7">
+        </div>
+
+        <div class="color-info">
+            <div>
+                <label>RGB</label>
+                <div class="color-box" id="rgbBox" style="background: rgb(102, 126, 234);">
+                    rgb(102, 126, 234)
+                </div>
+                <input type="text" class="color-format" id="rgbValue" value="rgb(102, 126, 234)">
+            </div>
+            <div>
+                <label>HSL</label>
+                <div class="color-box" id="hslBox" style="background: hsl(226, 76%, 67%);">
+                    hsl(226, 76%, 67%)
+                </div>
+                <input type="text" class="color-format" id="hslValue" value="hsl(226, 76%, 67%)">
+            </div>
+        </div>
+
+        <div class="palette">
+            <div class="palette-color" id="palette1" title="Complementary"></div>
+            <div class="palette-color" id="palette2" title="Analogous 1"></div>
+            <div class="palette-color" id="palette3" title="Analogous 2"></div>
+            <div class="palette-color" id="palette4" title="Triadic 1"></div>
+            <div class="palette-color" id="palette5" title="Triadic 2"></div>
+        </div>
+
+        <div class="color-name" id="colorName">
+            Indigo
+        </div>
+
+        <div class="instructions">
+            Pick a color using the color picker or type a hex code. The tool will convert it to RGB and HSL, and generate a color palette.
+        </div>
+    </div>
+
+    <script>
+        const colorPicker = document.getElementById('colorPicker');
+        const colorValue = document.getElementById('colorValue');
+        const rgbBox = document.getElementById('rgbBox');
+        const hslBox = document.getElementById('hslBox');
+        const rgbValue = document.getElementById('rgbValue');
+        const hslValue = document.getElementById('hslValue');
+        const paletteColors = [
+            document.getElementById('palette1'),
+            document.getElementById('palette2'),
+            document.getElementById('palette3'),
+            document.getElementById('palette4'),
+            document.getElementById('palette5')
+        ];
+        const colorName = document.getElementById('colorName');
+        const themeToggle = document.getElementById('themeToggle');
+        const body = document.body;
+
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : null;
+        }
+
+        function rgbToHsl(r, g, b) {
+            r /= 255;
+            g /= 255;
+            b /= 255;
+            const max = Math.max(r, g, b), min = Math.min(r, g, b);
+            let h, s, l = (max + min) / 2;
+
+            if (max === min) {
+                h = s = 0;
+            } else {
+                const d = max - min;
+                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                switch (max) {
+                    case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+                    case g: h = (b - r) / d + 2; break;
+                    case b: h = (r - g) / d + 4; break;
+                }
+                h /= 6;
+            }
+
+            return {
+                h: h * 360,
+                s: s * 100,
+                l: l * 100
+            };
+        }
+
+        function generatePalette(hex) {
+            const rgb = hexToRgb(hex);
+            const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
+            
+            // Complementary
+            const complementary = `hsl(${hsl.h > 180 ? hsl.h - 180 : hsl.h + 180}, ${hsl.s}%, ${hsl.l}%)`;
+            
+            // Analogous
+            const analogous1 = `hsl(${(hsl.h + 30) % 360}, ${hsl.s}%, ${hsl.l}%)`;
+            const analogous2 = `hsl(${(hsl.h + 60) % 360}, ${hsl.s}%, ${hsl.l}%)`;
+            
+            // Triadic
+            const triadic1 = `hsl(${(hsl.h + 120) % 360}, ${hsl.s}%, ${hsl.l}%)`;
+            const triadic2 = `hsl(${(hsl.h + 240) % 360}, ${hsl.s}%, ${hsl.l}%)`;
+            
+            return [
+                complementary,
+                analogous1,
+                analogous2,
+                triadic1,
+                triadic2
+            ];
+        }
+
+        function updateColor() {
+            const hex = colorPicker.value;
+            const rgb = hexToRgb(hex);
+            const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
+            const palette = generatePalette(hex);
+            
+            // Update inputs
+            colorValue.value = hex;
+            rgbValue.value = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+            hslValue.value = `hsl(${Math.round(hsl.h)}, ${Math.round(hsl.s)}%, ${Math.round(hsl.l)}%)`;
+            
+            // Update color boxes
+            rgbBox.style.background = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+            hslBox.style.background = `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`;
+            
+            // Update palette
+            paletteColors.forEach((paletteColor, i) => {
+                paletteColor.style.background = palette[i];
+            });
+            
+            // Update color name (simple approximation)
+            const names = {
+                '667eea': 'Indigo',
+                '764ba2': 'Grape',
+                'f5576c': 'Coral',
+                'f093fb': 'Lavender Rose',
+                '4facfe': 'Blue',
+                '00f2ea': 'Bright Cyan',
+                '43e97b': 'Green',
+                'ff7e5f': 'Orange',
+                'feb47b': 'Light Orange',
+                'ff6a88': 'Pink'
+            };
+            colorName.textContent = names[hex.substring(1)] || 'Custom Color';
+        }
+
+        function toggleTheme() {
+            body.classList.toggle('dark-theme');
+            body.classList.toggle('light-theme');
+            
+            // Update toggle button text and icon
+            if (body.classList.contains('dark-theme')) {
+                themeToggle.querySelector('span').textContent = 'Light Mode';
+                themeToggle.querySelector('.toggle-icon').textContent = '☀️';
+            } else {
+                themeToggle.querySelector('span').textContent = 'Dark Mode';
+                themeToggle.querySelector('.toggle-icon').textContent = '🌙';
+            }
+            
+            // Save preference to localStorage
+            const isDark = body.classList.contains('dark-theme');
+            localStorage.setItem('colorToolTheme', isDark ? 'dark' : 'light');
+        }
+
+        // Initialize theme from localStorage or system preference
+        function initTheme() {
+            const savedTheme = localStorage.getItem('colorToolTheme');
+            if (savedTheme === 'dark') {
+                body.classList.add('dark-theme');
+                body.classList.remove('light-theme');
+                themeToggle.querySelector('span').textContent = 'Light Mode';
+                themeToggle.querySelector('.toggle-icon').textContent = '☀️';
+            } else if (savedTheme === 'light') {
+                body.classList.add('light-theme');
+                body.classList.remove('dark-theme');
+                themeToggle.querySelector('span').textContent = 'Dark Mode';
+                themeToggle.querySelector('.toggle-icon').textContent = '🌙';
+            } else {
+                // Check system preference
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (prefersDark) {
+                    body.classList.add('dark-theme');
+                    body.classList.remove('light-theme');
+                    themeToggle.querySelector('span').textContent = 'Light Mode';
+                    themeToggle.querySelector('.toggle-icon').textContent = '☀️';
+                } else {
+                    body.classList.add('light-theme');
+                    body.classList.remove('dark-theme');
+                    themeToggle.querySelector('span').textContent = 'Dark Mode';
+                    themeToggle.querySelector('.toggle-icon').textContent = '🌙';
+                }
+            }
+        }
+
+        // Event listeners
+        colorPicker.addEventListener('input', updateColor);
+        colorValue.addEventListener('input', (e) => {
+            const hex = e.target.value;
+            if (/^#[0-9A-Fa-f]{6}$/.test(hex)) {
+                colorPicker.value = hex;
+                updateColor();
+            }
+        });
+        
+        themeToggle.addEventListener('click', toggleTheme);
+
+        // Initialize
+        initTheme();
+        updateColor();
+    </script>
+</body>
+</html>
